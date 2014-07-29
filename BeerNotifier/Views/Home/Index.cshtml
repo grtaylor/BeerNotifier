@@ -1,0 +1,119 @@
+﻿@using Mono.CSharp
+@model BeerNotifier.Models.UserViewModel
+@{
+    ViewBag.Title = "Beer Notifier";
+}
+<div id="message" class="alert alert-info hidden" role="alert"></div>
+@if (Model.ParticipantDetails != null)
+{
+    <div class="jumbotron">
+
+        <h2>Welcome back, @Model.ParticipantDetails.Name!</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <h4>
+                    You represent @Model.ParticipantDetails.Location[0] and have been a hero @Model.ParticipantDetails.DaysChosen times.  Your last deed of excellence was
+                    @if (Model.ParticipantDetails.LastPurchase == DateTime.MinValue)
+                    {
+                        <span>...never.  That's ok, your chance will come.</span>
+                    }
+                    else
+                    {
+                        <span>on</span>
+                        @Model.ParticipantDetails.LastPurchase.ToLongDateString()
+                    }
+                </h4>
+            </div>
+            <div class="col-md-6">
+                <p>Volunteer to bring beer next time <span class="h5">(or click it on behalf of someone that left their computer unlocked)</span></p><p><a class="btn btn-default" id="btnForce" href="#">Volunteer &raquo;</a></p>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="jumbotron">
+        <h1>Welcome to Beer Notifier 3.0</h1>
+        <p class="lead">If you are here, it means you are interested in participating in the most prestigious club around, Beer club.</p>
+    </div>
+}
+<div class="row">
+    <div class="col-md-4">
+        <h2>What does it mean</h2>
+        <p>
+            Every week, usually Thursday, a member of this noble coterie brings beer for the office to enjoy.  Usually a couple 12-packs will suffice
+            but don't feel limited to that.
+        </p>
+    </div>
+    <div class="col-md-4">
+        <h2>Any beer?</h2>
+        <p>Let's just say, leave the frat beer at home.  Bring the beer that people enjoy.</p>
+    </div>
+    @if (Model.ParticipantDetails == null)
+    {
+        <div class="col-md-4">
+            <h2>Ready to join?</h2>
+            <p>Choose your location and click "Join" to become a part of this prestigious group</p>
+            <p>
+                Which office?
+                @Html.DropDownList("location", Model.Locations)
+            </p>
+            <p><a class="btn btn-default" id="btnJoin" href="#">Join &raquo;</a></p>
+        </div>
+    }
+    else
+    {
+        <div class="col-md-4">
+            <h2>Update info</h2>
+            <p>Did you change offices? No problem.  Update your location below.</p>
+            <p>
+                Where are you now?
+                @Html.DropDownList("location", Model.Locations)
+            </p>
+            <p><a class="btn btn-default" id="btnChangeOffice" href="#">Change Office &raquo;</a></p>
+        </div>
+    }
+</div>
+@section scripts
+{
+    <script type="text/javascript">
+        var postUrl = '@Url.Action("Join")';
+        var updateUrl = '@Url.Action("UpdateLocation")';
+        var forceUrl = '@Url.Action("Force")';
+        $(function () {
+            $("#btnJoin").click(function (e) {
+                e.preventDefault();
+                callServer(postUrl, function () {
+                    $("#message").removeClass("hidden");
+                    $("#message").html("Congratulations! You are the newest member!");
+                });
+            });
+            $("#btnChangeOffice").click(function (e) {
+                e.preventDefault();
+                callServer(updateUrl, function () {
+                    $("#message").removeClass("hidden");
+                    $("#message").html("Information successfully updated.");
+                });
+            });
+            $("#btnForce").click(function (e) {
+                e.preventDefault();
+                callServer(forceUrl, function () {
+                    $("#message").removeClass("hidden");
+                    $("#message").html("Thanks for volunteering!  You have moved to the front of the list.  We look forward to your selection.");
+                });
+            });
+        });
+        function callServer(url, callback) {
+            var location = $("#location").val();
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: { location: location },
+                success: function (data, status, obj) {
+                    callback();
+                },
+                dataType: 'json'
+            });
+        };
+    </script>
+}
