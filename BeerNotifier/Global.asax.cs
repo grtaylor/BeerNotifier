@@ -51,7 +51,7 @@ namespace BeerNotifier
 
         public static SmptpServerSettings ServerDefault
         {
-            get { return new SmptpServerSettings(ConfigurationManager.AppSettings["SmptServer"], 25); }
+            get { return new SmptpServerSettings(ConfigurationManager.AppSettings["SmtpServer"], 25); }
         }
 
         public static SmtpDetails GroupDefault

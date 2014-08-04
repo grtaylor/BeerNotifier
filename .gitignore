@@ -17,7 +17,13 @@ $RECYCLE.BIN/
 # =========================
 # Operating System Files
 # =========================
+*.suo
+*.user
+_ReSharper.*
+App_Data/
 
+CL.config
+Web.config
 # OSX
 # =========================
 

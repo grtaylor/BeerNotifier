@@ -16,10 +16,13 @@
             <div class="modal-body">
                 <h4>Steps</h4>
                 <ol>
-                    <li>Select a csv file containing data in this order: Email, Location, LastDate (optional)</li>
+                    <li>Paste a string containing data in this order: Name, Email, LastDate, Location</li>
                     <li>Click Save</li>
                 </ol>
                 <div class="alert alert-info" role="alert">New users will be created, existing users will be updated</div>
+                <div>
+                    Tab delimited string to pre-populate from: <textarea rows="4" cols="50" id="preloadContent"></textarea>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -33,11 +36,21 @@
     <script type="text/javascript">
         var reload = '@Url.Action("ReloadSchedule")';
         var notifyTest = '@Url.Action("NotifyTest")';
+        var post = '@Url.Action("SetParticipants")';
         $(function() {
             $("#saveBatch").click(function (e) {
                 $("#myModal").modal('hide');
-                //e.preventDefault();
-
+                //e.preventDefault();]
+                var string = $("#preloadContent").val();
+                callServer(post, { participants: string }, function() {
+                    if (data.Success) {
+                        $("#message").removeClass("hidden");
+                        $("#message").html("Batch has been uploaded");
+                    } else {
+                        $("#message").removeClass("hidden");
+                        $("#message").html("An error occured: " + data.Message);
+                    }
+                });
             });
             $("#reloadSchedule").click(function(e) {
                 e.preventDefault();
@@ -55,14 +68,13 @@
             });
         });
 
-        function callServer(url, callback) {
-            var location = $("#location").val();
+        function callServer(url,info, callback) {
             $.ajax({
                 type: "POST",
                 url: url,
-                data: { location: location },
+                data: info,
                 success: function (data, status, obj) {
-                    callback();
+                    callback(data);
                 },
                 dataType: 'json'
             });

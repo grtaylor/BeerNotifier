@@ -30,7 +30,64 @@ namespace BeerNotifier.Controllers
         {
             Broker b = new Broker();
             b.NotifyBuyer(location);
-            return Json(new { Success = true });
+            return Json(new {Success = true});
+        }
+
+        public ActionResult SetParticipants(string participants)
+        {
+            var service = new ParticipantService();
+            var db = DataDocumentStore.Instance;
+            // make sure person isn't already added
+            using (var session = db.OpenSession())
+            {
+                // seperate into new lines
+                // seperate by tab
+                var persons = participants.Split(new[] {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var person in persons)
+                {
+                    // get each item ()
+                    var personItems = person.Split(new string[] {"\t"}, StringSplitOptions.RemoveEmptyEntries);
+                    // make sure we have all the data points
+                    if (personItems.Length != 4)
+                        return
+                            Json(
+                                new
+                                {
+                                    Success = false,
+                                    Message =
+                                        string.Format("This line did not have all of the required fields: {0}",
+                                            person)
+                                });
+                    var name = personItems[0];
+                    var email = personItems[1];
+                    var date = personItems[2];
+                    var location = personItems[3];
+                    DateTime lastDate;
+                    DateTime.TryParse(date, out lastDate);
+                    // see if person already exists, if so just update the date
+                    var participant = new Participant() {Email = email};
+                    var isPersonAlreadyAMember = service.IsPersonAlreadyAMember(participant, session);
+                    if (!isPersonAlreadyAMember)
+                    {
+                        participant = service.GetPersonDetails(User.Identity.Name);
+                        participant.Location = new[] {location};
+                        service.AddNewMember(participant, session);
+                    }
+                    else
+                    {
+                        // update the date of the person
+                        var existingUser = session.Query<Participant>().FirstOrDefault(x => x.Username == User.Identity.Name.Trim());
+                        if (existingUser != null)
+                        {
+                            existingUser.DaysChosen += 1;
+                            existingUser.LastPurchase = lastDate;
+                            session.Store(existingUser);
+                        }
+                    }
+                    session.SaveChanges();
+                }
+            }
+            return Json(new {Success = true});
         }
     }
 

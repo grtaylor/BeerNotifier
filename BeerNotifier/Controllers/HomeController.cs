@@ -37,15 +37,16 @@ namespace BeerNotifier.Controllers
         [HttpPost]
         public ActionResult Join(string location)
         {
+            var service = new ParticipantService();
             // look up details about the person from AD (name, email, cell phone)
-            var person = GetPersonDetails();
+            var person = service.GetPersonDetails(User.Identity.Name);
             var db = DataDocumentStore.Instance;
             // make sure person isn't already added
             using (var session = db.OpenSession())
             {
                     person.LastPurchase = DateTime.MinValue;
                     person.Location = new string[] {location};
-                    var success = AddNewMember(person,session);
+                    var success = service.AddNewMember(person,session);
                     if (success)
                     {
 
@@ -56,29 +57,9 @@ namespace BeerNotifier.Controllers
             return Json(new {Success = true});
         }
 
-        private bool AddNewMember(Participant person, IDocumentSession session)
-        {
-            if(!IsPersonAlreadyAMember(person, session))
-            {
-                session.Store(person);
-                session.SaveChanges();
-            }
-            return true;
-        }
+        
 
-        private Participant GetPersonDetails()
-        {
-            var context = new PrincipalContext(ContextType.Domain);
-            var p = UserPrincipal.FindByIdentity(context, IdentityType.SamAccountName, User.Identity.Name);
-            return new Participant {Name = p.Name,Email = p.EmailAddress,Username = User.Identity.Name,CellPhone = p.VoiceTelephoneNumber};
-        }
-
-        private bool IsPersonAlreadyAMember(Participant participant, IDocumentSession session)
-        {
-            var checkResult = session.CheckForUniqueConstraints(participant);
-            // returns whether its constraints are available
-            return !checkResult.ConstraintsAreFree();
-        }
+       
 
         public ActionResult UpdateLocation(string location)
         {
@@ -110,6 +91,33 @@ namespace BeerNotifier.Controllers
                 }
             }
             return Json(new { Success = true });
+        }
+    }
+
+    public class ParticipantService
+    {
+        public bool AddNewMember(Participant person, IDocumentSession session)
+        {
+            if (!IsPersonAlreadyAMember(person, session))
+            {
+                session.Store(person);
+                session.SaveChanges();
+            }
+            return true;
+        }
+
+        public bool IsPersonAlreadyAMember(Participant participant, IDocumentSession session)
+        {
+            var checkResult = session.CheckForUniqueConstraints(participant);
+            // returns whether its constraints are available
+            return !checkResult.ConstraintsAreFree();
+        }
+
+        public Participant GetPersonDetails(string username)
+        {
+            var context = new PrincipalContext(ContextType.Domain);
+            var p = UserPrincipal.FindByIdentity(context, IdentityType.SamAccountName, username);
+            return new Participant { Name = p.Name, Email = p.EmailAddress, Username = username, CellPhone = p.VoiceTelephoneNumber };
         }
     }
 
