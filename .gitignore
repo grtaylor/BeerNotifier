@@ -21,7 +21,6 @@ $RECYCLE.BIN/
 *.user
 _ReSharper.*
 App_Data/
-
 CL.config
 Web.config
 # OSX
@@ -40,3 +39,5 @@ Icon
 # Files that might appear on external disk
 .Spotlight-V100
 .Trashes
+
+BeerNotifier/bin/BeerNotifier.dll.config

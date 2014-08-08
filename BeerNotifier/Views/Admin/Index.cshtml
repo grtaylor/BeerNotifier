@@ -1,4 +1,5 @@
-﻿<h2>Welcome to the admin portal</h2>
+﻿@model BeerNotifier.Models.UserViewModel
+<h2>Welcome to the admin portal</h2>
 <div id="message" class="alert alert-info hidden" role="alert"></div>
 <h3>Actions</h3>
 <p><button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">Batch upload users</button></p>
@@ -23,11 +24,24 @@
                 <div>
                     Tab delimited string to pre-populate from: <textarea rows="4" cols="50" id="preloadContent"></textarea>
                 </div>
+                <div>
+                    Default Location: @Html.DropDownList("defaultLocation", Model.Locations)
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary" id="saveBatch">Save changes</button>
             </div>
+        </div>
+    </div>
+</div>
+<div class="modal hide" id="pleaseWaitDialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-header">
+        <h1>Processing...</h1>
+    </div>
+    <div class="modal-body">
+        <div class="progress progress-striped active">
+            <div class="bar" style="width: 100%;"></div>
         </div>
     </div>
 </div>
@@ -42,7 +56,10 @@
                 $("#myModal").modal('hide');
                 //e.preventDefault();]
                 var string = $("#preloadContent").val();
-                callServer(post, { participants: string }, function() {
+                var location = $("#defaultLocation").val();
+                var pleaseWaitDiv = $('<div class="modal hide" id="pleaseWaitDialog" data-backdrop="static" data-keyboard="false"><div class="modal-header"><h1>Processing...</h1></div><div class="modal-body"><div class="progress progress-striped active"><div class="bar" style="width: 100%;"></div></div></div></div>');
+                pleaseWaitDiv.modal();
+                callServer(post, { participants: string, defaultLocation: location }, function(data) {
                     if (data.Success) {
                         $("#message").removeClass("hidden");
                         $("#message").html("Batch has been uploaded");
@@ -50,6 +67,7 @@
                         $("#message").removeClass("hidden");
                         $("#message").html("An error occured: " + data.Message);
                     }
+                    pleaseWaitDiv.modal('hide');
                 });
             });
             $("#reloadSchedule").click(function(e) {
@@ -61,7 +79,8 @@
             });
             $("#notifyTest").click(function (e) {
                 e.preventDefault();
-                callServer(notifyTest, function () {
+                var location = $("#defaultLocation").val();
+                callServer(notifyTest, { location: location }, function () {
                     $("#message").removeClass("hidden");
                     $("#message").html("Test notification sent");
                 });

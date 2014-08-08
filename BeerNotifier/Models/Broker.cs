@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using BeerNotifier.Controllers;
@@ -63,6 +64,11 @@ namespace BeerNotifier.Models
                 participants = session.Query<Participant>().Where(x => x.Location.Contains(location)).ToList();
                 candidate = GetBuyerByLocation(location, session);
                 configuration = session.Query<BeerConfiguration>().FirstOrDefault();
+                // we assume that the person honors their commitment
+                candidate.DaysChosen += 1;
+                candidate.LastPurchase = DateTime.UtcNow.Date;
+                session.Store(candidate);
+                session.SaveChanges();
             }
             var notifier = new Notifier();
             notifier.SendEmailToGroup(configuration.SmtpServerDetails, configuration.SmtpDetailsGroup, participants,

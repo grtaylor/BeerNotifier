@@ -115,7 +115,7 @@ namespace BeerNotifier.Controllers
 
         public Participant GetPersonDetails(string username)
         {
-            var context = new PrincipalContext(ContextType.Domain);
+            var context = new PrincipalContext(ContextType.Domain,"cl.local","rtaylor","q65rke3as^");
             var p = UserPrincipal.FindByIdentity(context, IdentityType.SamAccountName, username);
             return new Participant { Name = p.Name, Email = p.EmailAddress, Username = username, CellPhone = p.VoiceTelephoneNumber };
         }
