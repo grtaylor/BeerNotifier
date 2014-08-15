@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.DirectoryServices.AccountManagement;
 using System.Linq;
 using System.Web.Mvc;
@@ -39,7 +40,11 @@ namespace BeerNotifier.Controllers
         {
             var service = new ParticipantService();
             // look up details about the person from AD (name, email, cell phone)
-            var person = service.GetPersonDetails(User.Identity.Name);
+            var username = User.Identity.Name;
+            var usernameSplit = User.Identity.Name.Split(new[]{"\\"},StringSplitOptions.None);
+            if (usernameSplit.Length > 0)
+                username = usernameSplit[1];
+            var person = service.GetPersonDetails(username);
             var db = DataDocumentStore.Instance;
             // make sure person isn't already added
             using (var session = db.OpenSession())
@@ -115,7 +120,7 @@ namespace BeerNotifier.Controllers
 
         public Participant GetPersonDetails(string username)
         {
-            var context = new PrincipalContext(ContextType.Domain,"cl.local","rtaylor","q65rke3as^");
+            var context = new PrincipalContext(ContextType.Domain,ConfigurationManager.AppSettings["Domain"],ConfigurationManager.AppSettings["DomainUser"],ConfigurationManager.AppSettings["DomainPassword"]);
             var p = UserPrincipal.FindByIdentity(context, IdentityType.SamAccountName, username);
             return new Participant { Name = p.Name, Email = p.EmailAddress, Username = username, CellPhone = p.VoiceTelephoneNumber };
         }
