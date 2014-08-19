@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Configuration;
+using System.Web.Hosting;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
@@ -18,13 +19,21 @@ namespace BeerNotifier
             BundleConfig.RegisterBundles(BundleTable.Bundles);
             // initialize db
             DataDocumentStore.Initialize();
+            var db = DataDocumentStore.Instance;
+            using (var session = db.OpenSession())
+            {
+                session.Store(new LogMessage { TimeStamp = DateTime.UtcNow, Message = "App pool initialized" });
+                session.SaveChanges();
+            }
             // setup scheduler
             Scheduling.SetupScheduler();
-            
-
         }
+    }
 
-        
+    public class LogMessage
+    {
+        public DateTime TimeStamp { get; set; }
+        public string Message { get; set; }
     }
 
     public class SmtpDetails
