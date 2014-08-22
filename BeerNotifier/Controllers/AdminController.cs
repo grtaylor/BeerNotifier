@@ -115,9 +115,13 @@ namespace BeerNotifier.Controllers
             var db = DataDocumentStore.Instance;
             using (var session = db.OpenSession())
             {
+                var username = httpContext.User.Identity.Name;
+                var usernameSplit = httpContext.User.Identity.Name.Split(new[] { "\\" }, StringSplitOptions.None);
+                if (usernameSplit.Length > 0)
+                    username = usernameSplit[1];
                 var adminUser =
                     session.Query<Participant>()
-                        .FirstOrDefault(x => x.Username == httpContext.User.Identity.Name && x.IsAdmin);
+                        .FirstOrDefault(x => x.Username == username && x.IsAdmin);
                 return adminUser != null;
             }
         }

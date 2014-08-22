@@ -3,9 +3,9 @@
 <div id="message" class="alert alert-info hidden" role="alert"></div>
 <h3>Actions</h3>
 <p><button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">Batch upload users</button></p>
-<p><a class="btn btn-info btn-lg" href="@string.Join("",Request.Url.Scheme,"://", Request.Url.Authority,":8888")">View Database</a></p>
+<p><a class="btn btn-info btn-lg" href="@string.Join("",Request.Url.Scheme,"://", Request.Url.Host,":8888")">View Database</a></p>
 <p><a id="reloadSchedule" class="btn btn-info btn-lg" href="#">Reload scheduled jobs</a></p>
-<p><a id="notifyTest" class="btn btn-info btn-lg" href="#">Notify user at </a> <input id="location" type="text"/></p>
+<p><a id="notifyTest" class="btn btn-info btn-lg" href="#">Notify user at </a> @Html.DropDownList("location", Model.Locations)</p>
 <!-- Modal -->
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">

@@ -29,7 +29,13 @@
                         // sorry Lincoln, had to be done.  Laziness wins.
                         using (var session = DataDocumentStore.Instance.OpenSession())
                         {
-                            var user = session.Query<Participant>().FirstOrDefault(x => x.Username == User.Identity.Name);
+                            var username = User.Identity.Name;
+                            var usernameSplit = User.Identity.Name.Split(new[] { "\\" }, StringSplitOptions.None);
+                            if (usernameSplit.Length > 0)
+                            {
+                                username = usernameSplit[1];
+                            }
+                            var user = session.Query<Participant>().FirstOrDefault(x => x.Username == username);
                             if (user != null && user.IsAdmin)
                             {
                                 <li>@Html.ActionLink("Admin", "Index", "Admin")</li>

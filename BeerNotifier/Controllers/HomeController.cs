@@ -18,7 +18,11 @@ namespace BeerNotifier.Controllers
             var db = DataDocumentStore.Instance;
             using (var session = db.OpenSession())
             {
-                var existingUser = session.Query<Participant>().FirstOrDefault(x => x.Username == User.Identity.Name.Trim());
+                var username = User.Identity.Name;
+                var usernameSplit = User.Identity.Name.Split(new[] { "\\" }, StringSplitOptions.None);
+                if (usernameSplit.Length > 0)
+                    username = usernameSplit[1];
+                var existingUser = session.Query<Participant>().FirstOrDefault(x => x.Username == username);
                 if (existingUser != null)
                     model.ParticipantDetails = existingUser;
                 model.Locations = new SelectList(session.Query<Location>().ToArray(),"Name","Name");
