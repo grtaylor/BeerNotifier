@@ -79,7 +79,7 @@
             });
             $("#notifyTest").click(function (e) {
                 e.preventDefault();
-                var location = $("#defaultLocation").val();
+                var location = $("#location").val();
                 callServer(notifyTest, { location: location }, function () {
                     $("#message").removeClass("hidden");
                     $("#message").html("Test notification sent");

@@ -34,6 +34,7 @@ namespace BeerNotifier
     {
         public DateTime TimeStamp { get; set; }
         public string Message { get; set; }
+        public string Details { get; set; }
     }
 
     public class SmtpDetails
@@ -141,6 +142,19 @@ namespace BeerNotifier
                 // handle the error ...
             }
             return message.Status;
+        }
+    }
+
+    public class Logger
+    {
+        public static void Log(string message, string details)
+        {
+            var db = DataDocumentStore.Instance;
+            using (var session = db.OpenSession())
+            {
+                session.Store(new LogMessage { TimeStamp = DateTime.UtcNow, Message = message, Details=details });
+                session.SaveChanges();
+            }
         }
     }
 }

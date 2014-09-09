@@ -20,7 +20,6 @@ namespace BeerNotifier.Models
                     var configuration = session.Query<BeerConfiguration>().FirstOrDefault();
                     NotifyPerson(candidate, configuration);
                 }
-
             }
         }
 
@@ -43,36 +42,66 @@ namespace BeerNotifier.Models
         private void NotifyPerson(Participant candidate, BeerConfiguration configuration)
         {
             Notifier notifier = new Notifier();
-            notifier.SendEmailToPerson(configuration.SmtpServerDetails, candidate, configuration.SmtpDetailsPerson);
-            if (candidate.CellPhone != null)
+            try
             {
-                notifier.SendText(configuration.TextMessageServerSettings, string.Format(configuration.TextMessageMessage,candidate.Name),
-                    candidate.CellPhone);
+                
+                notifier.SendEmailToPerson(configuration.SmtpServerDetails, candidate, configuration.SmtpDetailsPerson);
+                Logger.Log("Email notification successfully sent", candidate.Name + " has been notified via email");
+                if (candidate.CellPhone != null)
+                {
+                    notifier.SendText(configuration.TextMessageServerSettings,
+                        string.Format(configuration.TextMessageMessage, candidate.Name),
+                        candidate.CellPhone);
+                    Logger.Log("Text notification successfully sent",
+                        candidate.Name + " has been notified via text message");
+                }
+                else
+                {
+                    Logger.Log("Text notification NOT sent",
+                       candidate.Name + " does not have a cell phone number on file");
+                }
+            }
+            catch (Exception e)
+            {
+                var personName = string.Empty;
+                if (candidate != null)
+                    personName = candidate.Name;
+
+                Logger.Log("An Error occurred notifying beer person: " + personName, e.ToString());
             }
         }
 
         public void NotifyGroup(string location)
         {
-            IDocumentStore db = DataDocumentStore.Instance;
-            List<Participant> participants;
-            Participant candidate;
-            BeerConfiguration configuration;
-
-            using (var session = db.OpenSession())
+            try
             {
-                // get people in the location
-                participants = session.Query<Participant>().Where(x => x.Location.Contains(location)).ToList();
-                candidate = GetBuyerByLocation(location, session);
-                configuration = session.Query<BeerConfiguration>().FirstOrDefault();
-                // we assume that the person honors their commitment
-                candidate.DaysChosen += 1;
-                candidate.LastPurchase = DateTime.UtcNow.Date;
-                session.Store(candidate);
-                session.SaveChanges();
+                IDocumentStore db = DataDocumentStore.Instance;
+                List<Participant> participants;
+                Participant candidate;
+                BeerConfiguration configuration;
+
+                using (var session = db.OpenSession())
+                {
+                    // get people in the location
+                    participants = session.Query<Participant>().Where(x => x.Location.Contains(location)).ToList();
+                    candidate = GetBuyerByLocation(location, session);
+                    configuration = session.Query<BeerConfiguration>().FirstOrDefault();
+                    // we assume that the person honors their commitment
+                    candidate.DaysChosen += 1;
+                    candidate.LastPurchase = DateTime.UtcNow.Date;
+                    session.Store(candidate);
+                    session.SaveChanges();
+                }
+                var notifier = new Notifier();
+                notifier.SendEmailToGroup(configuration.SmtpServerDetails, configuration.SmtpDetailsGroup, participants,
+                    candidate);
+                Logger.Log("Group Email notification successfully sent", location + " has been notified via email");
             }
-            var notifier = new Notifier();
-            notifier.SendEmailToGroup(configuration.SmtpServerDetails, configuration.SmtpDetailsGroup, participants,
-                candidate);
+            catch (Exception e)
+            {
+                Logger.Log("An Error occurred notifying beer group at: " + location, e.ToString());
+                
+            }
         }
     }
 }
