@@ -46,7 +46,7 @@ namespace BeerNotifier.Models
         {
             foreach (var participant in people)
             {
-                using (var client = new SmtpClient())
+                using (var client = new SmtpClient(settings.Server, settings.Port))
                 {
                     var newMail = new MailMessage();
                     newMail.To.Add(new MailAddress(participant.Email));

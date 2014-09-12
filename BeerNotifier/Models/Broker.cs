@@ -85,6 +85,12 @@ namespace BeerNotifier.Models
                     // get people in the location
                     participants = session.Query<Participant>().Where(x => x.Location.Contains(location)).ToList();
                     candidate = GetBuyerByLocation(location, session);
+                    if (candidate == null)
+                    {
+                        Logger.Log("No participant found for: " + location + " no notification will be sent","");
+                        return;
+                    }
+
                     configuration = session.Query<BeerConfiguration>().FirstOrDefault();
                     // we assume that the person honors their commitment
                     candidate.DaysChosen += 1;
