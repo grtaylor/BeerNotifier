@@ -94,6 +94,7 @@ namespace BeerNotifier.Models
                     configuration = session.Query<BeerConfiguration>().FirstOrDefault();
                     // we assume that the person honors their commitment
                     candidate.DaysChosen += 1;
+                    candidate.Force = false; // just in case they were forced previously
                     candidate.LastPurchase = DateTime.UtcNow.Date;
                     session.Store(candidate);
                     session.SaveChanges();

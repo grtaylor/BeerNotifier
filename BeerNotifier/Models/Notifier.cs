@@ -23,7 +23,7 @@ namespace BeerNotifier.Models
                        new LinkedResource(Path.Combine(HttpRuntime.AppDomainAppPath,
                            (@"Content\images\beer_time.png")));
                 inlineLogo.ContentId = Guid.NewGuid().ToString();
-                var preFabBody = string.Format(smtpDetailsPerson.Body, candidate.Name, DateTime.Now.ToLongDateString());
+                var preFabBody = string.Format(smtpDetailsPerson.Body, candidate.Name, DateTime.Now.AddDays(1).ToLongDateString());
                 var body = string.Format(@"<img src=""cid:{0}"" /><br/>{1}", inlineLogo.ContentId, preFabBody);
 
 

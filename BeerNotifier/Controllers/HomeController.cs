@@ -39,13 +39,14 @@ namespace BeerNotifier.Controllers
         {
             return View();
         }
+
         [HttpPost]
         public ActionResult Join(string location)
         {
             var service = new ParticipantService();
             // look up details about the person from AD (name, email, cell phone)
             var username = User.Identity.Name;
-            var usernameSplit = User.Identity.Name.Split(new[]{"\\"},StringSplitOptions.None);
+            var usernameSplit = User.Identity.Name.Split(new[] {"\\"}, StringSplitOptions.None);
             if (usernameSplit.Length > 0)
                 username = usernameSplit[1];
             var person = service.GetPersonDetails(username);
@@ -53,22 +54,32 @@ namespace BeerNotifier.Controllers
             // make sure person isn't already added
             using (var session = db.OpenSession())
             {
-                    person.LastPurchase = DateTime.MinValue;
-                    person.Location = new string[] {location};
-                    var success = service.AddNewMember(person,session);
-                    if (success)
-                    {
+                var lastPurchase = DateTime.MinValue;
+                // make sure not to add as the absolute oldest date. It is possible that a warning email was already sent.
+                var currentOwner = session.Query<Participant>()
+                    .Where(x => x.Location.Contains(location))
+                    .OrderBy(x => x.LastPurchase)
+                    .FirstOrDefault();
+                if (currentOwner != null)
+                {
+                    lastPurchase = currentOwner.LastPurchase.AddDays(2);
+                }
+                person.LastPurchase = lastPurchase;
+                person.Location = new string[] {location};
+                var success = service.AddNewMember(person, session);
+                if (success)
+                {
 
-                    }
+                }
 
             }
             // add the person
             return Json(new {Success = true});
         }
 
-        
 
-       
+
+
 
         public ActionResult UpdateLocation(string location)
         {
