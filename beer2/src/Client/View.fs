@@ -3,6 +3,8 @@ module Client.View
 open Fable.Helpers.React
 open Fable.Helpers.React.Props
 
+open Fable.FontAwesome
+
 open Fulma
 
 open Types
@@ -37,13 +39,29 @@ let show = function
 | { Counter = Some counter } -> string counter.Value
 | { Counter = None   } -> "Loading..."
 
+let iconClock =
+    Icon.icon []
+        [ Fa.i [ Fa.Solid.Clock] [] ]
+
+let iconBeer =
+    Icon.icon []
+        [ Fa.i [ Fa.Solid.Beer ] [] ]
+
+let private navbarView =
+    div [ ClassName "navbar-bg" ]
+        [ Container.container []
+            [ Navbar.navbar [ Navbar.CustomClass "is-primary" ]
+                [ Navbar.Brand.div []
+                    [ Navbar.Item.a [ Navbar.Item.Props [ Href "#" ] ]
+                        [ iconBeer
+                          iconClock
+                          Heading.p [ Heading.Is4 ] [ str "Beer Notifier" ] ]
+                    ] ]
+            ] ]
+
 let view (model : Model) (dispatch : Msg -> unit) =
     div []
-        [ Navbar.navbar [ Navbar.Color IsPrimary ]
-            [ Navbar.Item.div [ ]
-                [ Heading.h2 [ ]
-                    [ span [] [ str "Libations Notifier" ] ] ] ]
-
+        [ navbarView
           Container.container []
               [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ]
                     [ Heading.h3 [] [ str ("Press buttons to manipulate counter: " + show model) ] ]
@@ -53,4 +71,5 @@ let view (model : Model) (dispatch : Msg -> unit) =
 
           Footer.footer [ ]
                 [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ]
-                    [ safeComponents ] ] ]
+                    [ safeComponents ] ]
+        ]

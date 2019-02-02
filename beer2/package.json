@@ -1,5 +1,9 @@
 {
     "private": true,
+    "dependencies": {
+        "bulma": "^0.7.2",
+        "font-awesome-5-css": "5.4.1"
+    },
     "devDependencies": {
         "@babel/core": "^7.2.0",
         "@babel/plugin-transform-runtime": "^7.2.0",
