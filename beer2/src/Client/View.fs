@@ -78,10 +78,18 @@ let private navbarView model =
                     ] ]
             ] ]
 
+let private homeView model =
+    Container.container [ Container.IsFluid ]
+        [ Content.content []
+            [ h2 [] [ str (sprintf "Hi - %s" model.Session.UserName) ]
+              button "Sign me up for beer next week!" (fun _ -> Fable.Import.Browser.window.alert("OK - you are signed up for beer next week! (once this button is wired up)") )
+            ]
+        ]
+
 let private renderPage model dispatch =
     match model with
     | { CurrentPage = Router.Home } ->
-        button "Sign me up for beer next week!" (fun _ -> Fable.Import.Browser.window.alert("OK - you are signed up for beer next week! (once this button is wired up)")  )
+        homeView model
     | { CurrentPage = Router.User _
         UserDispatcher = Some extractedModel } ->
         User.Dispatcher.View.root model.Session extractedModel (UserDispatcherMsg >> dispatch)
