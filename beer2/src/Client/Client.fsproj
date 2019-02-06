@@ -5,6 +5,27 @@
     </PropertyGroup>
     <ItemGroup>
         <Compile Include="..\Shared\Shared.fs" />
+        <Compile Include="Global\Logger.fs" />
+        <Compile Include="Global\Database.fs" />
+        <Compile Include="Global\Router.fs" />
+        <Compile Include="Global\Render.fs" />
+        <!-- User pages -->
+        <Compile Include="User\Index\Types.fs" />
+        <Compile Include="User\Index\Rest.fs" />
+        <Compile Include="User\Index\State.fs" />
+        <Compile Include="User\Index\View.fs" />
+        <Compile Include="User\Show\Types.fs" />
+        <Compile Include="User\Show\Rest.fs" />
+        <Compile Include="User\Show\State.fs" />
+        <Compile Include="User\Show\View.fs" />
+        <Compile Include="User\Create\Types.fs" />
+        <Compile Include="User\Create\Rest.fs" />
+        <Compile Include="User\Create\State.fs" />
+        <Compile Include="User\Create\View.fs" />
+        <Compile Include="User\Dispatcher\Types.fs" />
+        <Compile Include="User\Dispatcher\State.fs" />
+        <Compile Include="User\Dispatcher\View.fs" />
+        <!-- Landing page -->
         <Compile Include="Types.fs" />
         <Compile Include="State.fs" />
         <Compile Include="View.fs" />

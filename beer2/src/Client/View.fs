@@ -35,19 +35,37 @@ let button txt onClick =
           Button.OnClick onClick ]
         [ str txt ]
 
-let show = function
-| { Counter = Some counter } -> string counter.Value
-| { Counter = None   } -> "Loading..."
-
-let iconClock =
+let private iconClock =
     Icon.icon []
         [ Fa.i [ Fa.Solid.Clock] [] ]
 
-let iconBeer =
+let private iconBeer =
     Icon.icon []
         [ Fa.i [ Fa.Solid.Beer ] [] ]
 
-let private navbarView =
+let private currentPageName model =
+    match model with
+    | { CurrentPage = page } ->
+        let name =
+            match page with
+            | Router.Home ->
+                p [] [str "Home"]
+            | Router.Page.User userPage ->
+                p [] [str (sprintf "User - %A" userPage)]
+        Navbar.Item.div [] [ name ]
+
+let navbarPropOnClickGoTo routerPage =
+    Navbar.Item.Props [ OnClick (fun _ -> routerPage |> Router.modifyLocation ) ]
+
+let private navbarStart dispatch =
+    Navbar.Start.div []
+        [ Navbar.Item.a [ navbarPropOnClickGoTo Router.Home ]
+            [ str "Home" ]
+          Navbar.Item.a [ navbarPropOnClickGoTo (Router.UserPage.Index |> Router.User) ]
+            [ str "Users" ]
+        ]
+
+let private navbarView model =
     div [ ClassName "navbar-bg" ]
         [ Container.container []
             [ Navbar.navbar [ Navbar.CustomClass "is-primary" ]
@@ -56,18 +74,26 @@ let private navbarView =
                         [ iconBeer
                           iconClock
                           Heading.p [ Heading.Is4 ] [ str "Beer Notifier" ] ]
+                      currentPageName model
                     ] ]
             ] ]
 
-let view (model : Model) (dispatch : Msg -> unit) =
+let private renderPage model dispatch =
+    match model with
+    | { CurrentPage = Router.Home } ->
+        button "Sign me up for beer next week!" (fun _ -> Fable.Import.Browser.window.alert("OK - you are signed up for beer next week! (once this button is wired up)")  )
+    | { CurrentPage = Router.User _
+        UserDispatcher = Some extractedModel } ->
+        User.Dispatcher.View.root model.Session extractedModel (UserDispatcherMsg >> dispatch)
+    | _ ->
+        p [] [ str "Page not found" ]
+
+let root (model : Model) (dispatch : Msg -> unit) =
     div []
-        [ navbarView
+        [ navbarView model
           Container.container []
               [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ]
-                    [ Heading.h3 [] [ str ("Press buttons to manipulate counter: " + show model) ] ]
-                Columns.columns []
-                    [ Column.column [] [ button "-" (fun _ -> dispatch Decrement) ]
-                      Column.column [] [ button "+" (fun _ -> dispatch Increment) ] ] ]
+                    [ renderPage model dispatch ] ]
 
           Footer.footer [ ]
                 [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ]
