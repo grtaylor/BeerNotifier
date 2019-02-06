@@ -62,10 +62,10 @@ let private navbarStart dispatch =
         [ Navbar.Item.a [ navbarPropOnClickGoTo Router.Home ]
             [ str "Home" ]
           Navbar.Item.a [ navbarPropOnClickGoTo (Router.UserPage.Index |> Router.User) ]
-            [ str "Users" ]
+            [ str "Participants" ]
         ]
 
-let private navbarView model =
+let private navbarView model dispatch =
     div [ ClassName "navbar-bg" ]
         [ Container.container []
             [ Navbar.navbar [ Navbar.CustomClass "is-primary" ]
@@ -74,7 +74,7 @@ let private navbarView model =
                         [ iconBeer
                           iconClock
                           Heading.p [ Heading.Is4 ] [ str "Beer Notifier" ] ]
-                      currentPageName model
+                      navbarStart dispatch
                     ] ]
             ] ]
 
@@ -98,7 +98,7 @@ let private renderPage model dispatch =
 
 let root (model : Model) (dispatch : Msg -> unit) =
     div []
-        [ navbarView model
+        [ navbarView model dispatch
           Container.container []
               [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ]
                     [ renderPage model dispatch ] ]
