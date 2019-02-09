@@ -25,12 +25,16 @@ let port = 8085us
 
 let handleGetSecured =
     fun (next : HttpFunc) (ctx : HttpContext) ->
-        let email = ctx.User.FindFirst ClaimTypes.NameIdentifier
+        // yes ClaimTypes.Name is actually the email
+        let email = ctx.User.FindFirst ClaimTypes.Name
         text (sprintf "User %s is authorized to access this resource." email.Value) next ctx
 
 let securedRouter = router {
     pipe_through (Auth.requireAuthentication (ChallengeType.Custom OpenIdConnectDefaults.AuthenticationScheme))
-    get "/secured" handleGetSecured
+    // any routes in this router are relative to http:localhost/port/secured/
+    // this get means http://localhost:port/secured
+    get "" handleGetSecured
+    get "/" handleGetSecured
 }
 
 let handleGetPublic =
@@ -39,6 +43,7 @@ let handleGetPublic =
 
 let topRouter = router {
     get "/" handleGetPublic
+    // ANY http://localhost:port/secured goes to `securedRouter`
     forward "/secured" securedRouter
 }
 
