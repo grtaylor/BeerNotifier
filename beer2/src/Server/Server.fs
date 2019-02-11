@@ -14,27 +14,32 @@ open FSharp.Control.Tasks.V2
 
 open Giraffe
 open Saturn
+open Saturn.Extensions.OpenIdAuth
 
 open Shared
-open Saturn.Extensions.OpenIdAuth
 
 
 let publicPath = Path.GetFullPath "../Client/public"
 let port = 8085us
 
-
+// todo - show current user's beer history data to them (last "deed of excellence", how many times they brought beer)
+// and a functioning "volunteer to be next" button (which may be more for the UI to handle than the API)
 let handleGetSecured =
     fun (next : HttpFunc) (ctx : HttpContext) ->
         // yes ClaimTypes.Name is actually the email
         let email = ctx.User.FindFirst ClaimTypes.Name
         text (sprintf "User %s is authorized to access this resource." email.Value) next ctx
 
-let securedRouter = router {
+let apiRouter = router {
+    not_found_handler (text "Api 404")
+
     pipe_through (Auth.requireAuthentication (ChallengeType.Custom OpenIdConnectDefaults.AuthenticationScheme))
-    // any routes in this router are relative to http:localhost/port/secured/
-    // this get means http://localhost:port/secured
+
+    // any routes in this router are relative to http:localhost/port/api/
+    // this get means http://localhost:port/api
     get "" handleGetSecured
     get "/" handleGetSecured
+    forward "/users" Users.controller
 }
 
 let handleGetPublic =
@@ -44,7 +49,7 @@ let handleGetPublic =
 let topRouter = router {
     get "/" handleGetPublic
     // ANY http://localhost:port/secured goes to `securedRouter`
-    forward "/secured" securedRouter
+    forward "/api" apiRouter
 }
 
 let configureSerialization (services:IServiceCollection) =
