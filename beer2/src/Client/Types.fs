@@ -7,12 +7,12 @@ open Shared
 type Model =
     { CurrentPage : Router.Page
       // populate this with LDAP
-      Session : Entities.User
+      Session : Shared.Entities.User
       UserDispatcher : User.Dispatcher.Types.Model option }
 
     static member Empty =
         { CurrentPage = Router.Home
-          Session = Entities.User.EmptyTest
+          Session = { Shared.Entities.User.UserName = "EmptyTest" }
           UserDispatcher = None }
         // { CurrentPage =
         //     Router.UserPage.Index

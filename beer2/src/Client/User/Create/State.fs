@@ -25,7 +25,7 @@ let validateModel model =
 
     newModel, hasError
 
-let update (user : Entities.User) msg (model : Model) =
+let update (user : Shared.Entities.User) msg (model : Model) =
     match msg with
     | Submit ->
         match validateModel model with

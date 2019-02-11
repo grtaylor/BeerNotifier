@@ -39,6 +39,7 @@ let apiRouter = router {
     // this get means http://localhost:port/api
     get "" handleGetSecured
     get "/" handleGetSecured
+
     forward "/users" Users.Controller.controller
 }
 
@@ -48,7 +49,7 @@ let handleGetPublic =
 
 let topRouter = router {
     get "/" handleGetPublic
-    // ANY http://localhost:port/secured goes to `securedRouter`
+
     forward "/api" apiRouter
 }
 
@@ -78,6 +79,7 @@ let app = application {
     use_router topRouter
     memory_cache
     use_static publicPath
+    // TODO - https://zaid-ajaj.github.io/Fable.Remoting/src/dependency-injection.html
     service_config configureSerialization
     // we extended Saturn with SaturnExtensions.fs (name of the file does not matter)
     use_open_id_auth_with_config openIdConfig

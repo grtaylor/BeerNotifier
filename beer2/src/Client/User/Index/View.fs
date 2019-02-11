@@ -7,13 +7,13 @@ open Fable.Helpers.React.Props
 
 open Fulma
 
-let private userView (user : UserInfo) =
-    p [] [ str user.Name ]
+let private userView (user : Shared.Entities.User) =
+    p [] [ str user.UserName ]
 
 let private usersList users =
     Columns.columns [ Columns.IsCentered ]
         [ Column.column [ Column.Width(Screen.All, Column.IsTwoThirds) ]
-            (users |> List.map userView) ]
+            (users |> Seq.map userView) ]
 
 let root model _ =
     match model.Users with

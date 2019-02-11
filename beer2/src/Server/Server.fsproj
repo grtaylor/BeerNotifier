@@ -5,7 +5,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../Shared/Shared.fs" />
-    <Compile Include="Users/Types.fs" />
+    <Compile Include="Users/Entities.fs" />
+    <Compile Include="Users/Domain.fs" />
     <Compile Include="Users/Database.fs" />
     <Compile Include="Users/Users.fs" />
     <Compile Include="Authentication.fs" />

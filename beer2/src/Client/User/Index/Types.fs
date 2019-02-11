@@ -1,17 +1,15 @@
 module User.Index.Types
 
-type UserInfo =
-    { Id : int
-      Name : string }
+open Shared
 
 type Model =
-    { Users : UserInfo list option }
+    { Users : Entities.User seq option }
 
     static member Empty =
         { Users = None }
 
 type GetUsersResult =
-| Success of UserInfo list
+| Success of Entities.User seq
 | Error of exn
 
 type Msg =

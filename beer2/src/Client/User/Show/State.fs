@@ -7,7 +7,7 @@ open Elmish
 let init userId =
     Model.Empty userId, Cmd.ofMsg (GetDetails userId)
 
-let update (user : Entities.User) msg (model : Model) =
+let update (user : Shared.Entities.User) msg (model : Model) =
     match msg with
     | GetDetails userId ->
         model, Cmd.ofPromise Rest.getDetails userId (GetDetailsResult.Success >> GetDetailsResult) (GetDetailsResult.Error >> GetDetailsResult)
