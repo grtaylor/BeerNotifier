@@ -39,7 +39,7 @@ let apiRouter = router {
     // this get means http://localhost:port/api
     get "" handleGetSecured
     get "/" handleGetSecured
-    forward "/users" Users.controller
+    forward "/users" Users.Controller.controller
 }
 
 let handleGetPublic =
