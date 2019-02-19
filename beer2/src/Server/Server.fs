@@ -84,6 +84,11 @@ let app = application {
     // we extended Saturn with SaturnExtensions.fs (name of the file does not matter)
     use_open_id_auth_with_config openIdConfig
     use_gzip
+    use_cors "localhost:8080"
+        (fun builder -> builder.WithOrigins("http://localhost:8080")
+                               .AllowAnyHeader()
+                               .AllowAnyMethod()
+                               .AllowAnyOrigin() |> ignore)
 }
 
 run app
