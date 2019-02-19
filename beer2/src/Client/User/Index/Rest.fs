@@ -9,8 +9,8 @@ let getUsers _ =
     promise {
         let! data =
         // todo - pass http://server:port/api/ from config to `getUsers`
-            fetch "http://localhost:8085/api/users" []
-            |> Promise.bind (fun result -> result.json<seq<Shared.Entities.User>>() )
+            fetch "/api/users" [ Mode RequestMode.Sameorigin ]
+            |> Promise.bind (fun result -> result.json<seq<Shared.Entities.User>>())
 
         return GetUsersResult.Success data
     }
