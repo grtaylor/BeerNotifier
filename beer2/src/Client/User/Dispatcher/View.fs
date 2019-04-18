@@ -17,6 +17,9 @@ let root model dispatch =
     | { CurrentPage = User.Create
         CreateModel = Some extractedModel } ->
             User.Create.View.root extractedModel (CreateMsg >> dispatch)
+    | { CurrentPage = User.AboutMe
+        AboutModel = Some extractedModel } ->
+            User.About.View.root extractedModel (AboutMsg >> dispatch)
     // don't do wildcard on the model record so the compiler
     // helps when you add a new kind of Router.NewPage
     | { IndexModel = _ }

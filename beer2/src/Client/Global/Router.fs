@@ -11,6 +11,7 @@ type User =
 | Show of int // make int UserId
 | Create // rename as Join beer notifier?
 // | Login // elmish has runWithAdal at start in Client.fs
+| AboutMe
 
 [<RequireQualifiedAccess>]
 type AuthPage =
@@ -32,7 +33,7 @@ let private toHash page =
             | User.Index -> "#user/index"
             | User.Show userId -> sprintf "#user/%i" userId
             | User.Create -> "#user/create"
-            // | User.Login -> "#user/login"
+            | User.AboutMe -> "#user/about"
     | Page.Home -> "#/"
 
 let pageParser : Parser<Page -> Page, Page> =
@@ -40,6 +41,7 @@ let pageParser : Parser<Page -> Page, Page> =
         map (User.Index |> AuthPage.User |> Page.AuthPage) (s "user" </> s "index")
         map (User.Show >> AuthPage.User >> Page.AuthPage) (s "user" </> i32)
         map (User.Create |> AuthPage.User |> Page.AuthPage) (s "user" </> s "create")
+        map (User.AboutMe |> AuthPage.User |> Page.AuthPage) (s "user" </> s "about")
         // go to Home if not matched
         map (Page.Home) top
     ]

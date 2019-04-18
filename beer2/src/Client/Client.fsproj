@@ -11,6 +11,9 @@
         <Compile Include="Global\Router.fs" />
         <Compile Include="Global\Render.fs" />
         <!-- User pages -->
+        <Compile Include="User\About\Types.fs" />
+        <Compile Include="User\About\State.fs" />
+        <Compile Include="User\About\View.fs" />
         <Compile Include="User\Index\Types.fs" />
         <Compile Include="User\Index\Rest.fs" />
         <Compile Include="User\Index\State.fs" />

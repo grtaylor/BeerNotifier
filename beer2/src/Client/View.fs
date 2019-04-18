@@ -65,6 +65,8 @@ let private navbarStart dispatch =
             [ str "Home" ]
           Navbar.Item.a [ navbarPropOnClickGoTo (Router.User.Index |> Router.AuthPage.User |> Router.Page.AuthPage) ]
             [ str "Participants" ]
+          Navbar.Item.a [ navbarPropOnClickGoTo (Router.User.AboutMe |> Router.AuthPage.User |> Router.Page.AuthPage) ]
+            [ str "About Me" ]
         ]
 
 let private navbarView model dispatch =

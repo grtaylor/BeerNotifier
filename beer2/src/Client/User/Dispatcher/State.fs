@@ -20,6 +20,9 @@ let init (userPage : Router.User) =
         | User.Create ->
             let (subModel, subCmd) = User.Create.State.init ()
             { model with CreateModel = Some subModel }, Cmd.map CreateMsg subCmd
+        | User.AboutMe ->
+            let (subModel, subCmd) = User.About.State.init ()
+            { model with AboutModel = Some subModel }, Cmd.map AboutMsg subCmd
 
     currentPageModel, currentPageCmd
 
@@ -36,6 +39,10 @@ let update msg model =
     | CreateMsg msg, { CreateModel = Some extractedModel } ->
         let (subModel, subCmd) = User.Create.State.update msg extractedModel
         { model with CreateModel = Some subModel }, Cmd.map CreateMsg subCmd
+
+    | AboutMsg msg, { AboutModel = Some extractedModel } ->
+        let (subModel, subCmd) = User.About.State.update msg extractedModel
+        { model with AboutModel = Some subModel }, Cmd.map AboutMsg subCmd
     // do not wildcard the entire model so pattern matching will help you detect when you add a new Model type
     // so, do not do this:
     // | AMsg _, _ ->
@@ -43,6 +50,7 @@ let update msg model =
     // XyzMsg can only apply when XyzModel is initialized to handle Msgs
     | IndexMsg _, { IndexModel = None }
     | ShowMsg _, { ShowModel = None }
-    | CreateMsg _, { CreateModel = None } ->
+    | CreateMsg _, { CreateModel = None }
+    | AboutMsg _, { AboutModel = None } ->
         Browser.console.log "[User.Dispatcher.State] discarded message"
         model, Cmd.none
