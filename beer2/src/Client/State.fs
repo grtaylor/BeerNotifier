@@ -37,7 +37,7 @@ let urlUpdate (result : Option<Router.Page>) model =
 let update (msg : Msg) (model : Model) : Model * Cmd<Msg> =
     match msg, model with
     | (UserDispatcherMsg msg, { UserDispatcher = Some extractedModel }) ->
-        let (subModel, subCmd) = User.Dispatcher.State.update model.Session msg extractedModel
+        let (subModel, subCmd) = User.Dispatcher.State.update msg extractedModel
         { model with UserDispatcher = Some subModel }, Cmd.map UserDispatcherMsg subCmd
     | (UserDispatcherMsg capturedMsg, _) ->
         Browser.console.log "[Client.State] discarded message"
