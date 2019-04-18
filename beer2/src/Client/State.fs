@@ -9,6 +9,8 @@ open Thoth.Json
 
 open Shared
 
+open Router
+
 open Types
 
 let urlUpdate (result : Option<Router.Page>) model =
@@ -20,12 +22,13 @@ let urlUpdate (result : Option<Router.Page>) model =
         Browser.console.log(sprintf "Page is %A" page)
         let model = { model with CurrentPage = page }
         match page with
-        | Router.User userPage ->
-            let (subModel, subCmd) = User.Dispatcher.State.init userPage
-            { model with UserDispatcher = Some subModel }, Cmd.map UserDispatcherMsg subCmd
-        | Router.Home ->
-            // model, Cmd.none
-            let (subModel, subCmd) = User.Dispatcher.State.init Router.UserPage.Index
+        | Page.AuthPage authPage ->
+            match authPage with
+            | AuthPage.User userPage ->
+                let (subModel, subCmd) = User.Dispatcher.State.init userPage
+                { model with UserDispatcher = Some subModel }, Cmd.map UserDispatcherMsg subCmd
+        | Page.Home ->
+            let (subModel, subCmd) = User.Dispatcher.State.init (Router.User.Show 42) // add ShowCurrentUser?
             { model with UserDispatcher = Some subModel }, Cmd.map UserDispatcherMsg subCmd
 
 // The update function computes the next state of the application based on the current state and the incoming events/messages

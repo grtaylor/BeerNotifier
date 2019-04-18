@@ -7,8 +7,10 @@ open Fable.Helpers.React.Props
 
 open Fulma
 
-let root (user : Shared.Entities.User) model dispatch =
+let root model dispatch =
     Container.container []
         [ Section.section []
             [ Heading.h3 []
-                [ str ("You are " + user.UserName) ] ] ]
+                [ str "TODO - Sign up for beer notifier" ]
+              str "TODO - show sign up info form" ] ]
+              //User.Index.View.root model dispatch ] ]

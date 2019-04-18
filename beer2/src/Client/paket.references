@@ -6,4 +6,4 @@ group Client
     Fable.Core
     Fulma
     Fable.FontAwesome.Free
-
+    Fable.Import.Adal

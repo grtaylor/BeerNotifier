@@ -67,11 +67,9 @@ let openIdConfig =
         o.ClientId <- clientId
         o.Authority <- authority
         o.UseTokenLifetime <- true
-        // maybe I don't need to set this because /signin-oidc is default per https://github.com/openiddict/openiddict-core/issues/35#issuecomment-162450400
-        o.CallbackPath <- Microsoft.AspNetCore.Http.PathString("/signin-oidc")
+        // <website root>/signin-oidc is default per https://github.com/openiddict/openiddict-core/issues/35#issuecomment-162450400
+        // make sure this path is set in portal.azure.com Azure AD Redirect URIs
         o.ResponseType <- "id_token"
-        // -SECRET-SECRET-SECRET-SECRET-SECRET-SECRET-SECRET-
-        // o.ClientSecret <- "you best put a secret here secretly"
 
     Action<OpenIdConnect.OpenIdConnectOptions>(fn)
 

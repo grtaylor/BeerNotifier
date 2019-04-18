@@ -25,4 +25,4 @@ Program.mkProgram init update root
 #if DEBUG
 |> Program.withDebugger
 #endif
-|> Program.run
+|> Authentication.runWithAdal Authentication.context

@@ -7,6 +7,8 @@ open Fable.FontAwesome
 
 open Fulma
 
+open Router
+
 open Types
 
 
@@ -48,10 +50,10 @@ let private currentPageName model =
     | { CurrentPage = page } ->
         let name =
             match page with
-            | Router.Home ->
+            | Router.Page.Home ->
                 p [] [str "Home"]
-            | Router.Page.User userPage ->
-                p [] [str (sprintf "User - %A" userPage)]
+            | Router.Page.AuthPage authPage ->
+                p [] [str (sprintf "Page: %A | Logged in as User - %A" authPage model.Session)]
         Navbar.Item.div [] [ name ]
 
 let navbarPropOnClickGoTo routerPage =
@@ -59,9 +61,9 @@ let navbarPropOnClickGoTo routerPage =
 
 let private navbarStart dispatch =
     Navbar.Start.div []
-        [ Navbar.Item.a [ navbarPropOnClickGoTo Router.Home ]
+        [ Navbar.Item.a [ navbarPropOnClickGoTo Router.Page.Home ]
             [ str "Home" ]
-          Navbar.Item.a [ navbarPropOnClickGoTo (Router.UserPage.Index |> Router.User) ]
+          Navbar.Item.a [ navbarPropOnClickGoTo (Router.User.Index |> Router.AuthPage.User |> Router.Page.AuthPage) ]
             [ str "Participants" ]
         ]
 
@@ -78,21 +80,23 @@ let private navbarView model dispatch =
                     ] ]
             ] ]
 
-let private homeView model =
+let private homeView model dispatch =
     Container.container [ Container.IsFluid ]
         [ Content.content []
-            [ h2 [] [ str (sprintf "Hi - %s" model.Session.UserName) ]
-              button "Sign me up for beer next week!" (fun _ -> Fable.Import.Browser.window.alert("OK - you are signed up for beer next week! (once this button is wired up)") )
+            [ str "Should probably greet the logged in user"
+              button "Sign me up for beer next week!" (fun _ ->
+                Fable.Import.Browser.window.alert("OK - you are signed up for beer next week! (once this button is wired up)") )
             ]
         ]
 
 let private renderPage model dispatch =
     match model with
-    | { CurrentPage = Router.Home } ->
-        homeView model
-    | { CurrentPage = Router.User _
+    | { CurrentPage = Page.Home } ->
+        homeView model dispatch
+    | { CurrentPage = Page.AuthPage (AuthPage.User _)
         UserDispatcher = Some extractedModel } ->
-        User.Dispatcher.View.root model.Session extractedModel (UserDispatcherMsg >> dispatch)
+        let d' = (UserDispatcherMsg >> dispatch)
+        User.Dispatcher.View.root extractedModel d'
     | _ ->
         p [] [ str "Page not found" ]
 

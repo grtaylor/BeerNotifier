@@ -25,7 +25,7 @@ let validateModel model =
 
     newModel, hasError
 
-let update (user : Shared.Entities.User) msg (model : Model) =
+let update msg (model : Model) =
     match msg with
     | Submit ->
         match validateModel model with
@@ -41,7 +41,7 @@ let update (user : Shared.Entities.User) msg (model : Model) =
         match result with
         | CreateUserResult.Success createdUser ->
             { model with IsWaitingOnServer = false },
-            Router.newUrl (Router.UserPage.Show createdUser.Id |> Router.User)
+            Router.newUrl (Router.User.Show createdUser.Id |> Router.AuthPage.User |> Router.Page.AuthPage)
         | CreateUserResult.Error error ->
             Logger.debugfn "[User.Show.State] Error when creating user:\n %A" error
             { model with IsWaitingOnServer = false }, Cmd.none

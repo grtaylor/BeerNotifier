@@ -1,13 +1,13 @@
 module User.Dispatcher.Types
 
 type Model =
-    { CurrentPage : Router.UserPage
+    { CurrentPage : Router.User
       IndexModel : User.Index.Types.Model option
       ShowModel : User.Show.Types.Model option
       CreateModel : User.Create.Types.Model option }
 
     static member Empty =
-        { CurrentPage = Router.UserPage.Index
+        { CurrentPage = Router.User.Index
           IndexModel = None
           ShowModel = None
           CreateModel = None }
