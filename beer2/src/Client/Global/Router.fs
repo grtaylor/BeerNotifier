@@ -30,18 +30,18 @@ let private toHash page =
         match authPage with
         | AuthPage.User userPage ->
             match userPage with
-            | User.Index -> "#user/index"
-            | User.Show userId -> sprintf "#user/%i" userId
-            | User.Create -> "#user/create"
-            | User.AboutMe -> "#user/about"
+            | User.Index -> "#users/index"
+            | User.Show userId -> sprintf "#users/%i" userId
+            | User.Create -> "#users/create"
+            | User.AboutMe -> "#users/about"
     | Page.Home -> "#/"
 
 let pageParser : Parser<Page -> Page, Page> =
     oneOf [
-        map (User.Index |> AuthPage.User |> Page.AuthPage) (s "user" </> s "index")
-        map (User.Show >> AuthPage.User >> Page.AuthPage) (s "user" </> i32)
-        map (User.Create |> AuthPage.User |> Page.AuthPage) (s "user" </> s "create")
-        map (User.AboutMe |> AuthPage.User |> Page.AuthPage) (s "user" </> s "about")
+        map (User.Index |> AuthPage.User |> Page.AuthPage) (s "users" </> s "index")
+        map (User.Show >> AuthPage.User >> Page.AuthPage) (s "users" </> i32)
+        map (User.Create |> AuthPage.User |> Page.AuthPage) (s "users" </> s "create")
+        map (User.AboutMe |> AuthPage.User |> Page.AuthPage) (s "users" </> s "about")
         // go to Home if not matched
         map (Page.Home) top
     ]

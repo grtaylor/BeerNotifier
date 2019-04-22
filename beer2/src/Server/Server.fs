@@ -35,8 +35,7 @@ let apiRouter = router {
 
     pipe_through (Auth.requireAuthentication (ChallengeType.Custom OpenIdConnectDefaults.AuthenticationScheme))
 
-    // any routes in this router are relative to http:localhost/port/api/
-    // this get means http://localhost:port/api
+    // any routes in this router are relative to http://localhost:port/api/
     get "" handleGetSecured
     get "/" handleGetSecured
 
