@@ -21,19 +21,55 @@ let context =
 
     adal.Adal.createAuthContext(config)
 
-let bearerHeader() =
+let private substringSafe (str : string) length =
+    if str.Length >= length
+    then str.Substring(0, length)
+    else str.Substring(0)
+
+let private substringTruncatedSafe str length =
+    (substringSafe str length) + sprintf "... [truncated to length %i]" length
+
+let private getCachedToken () =
+    let t = context.getCachedToken(clientId)
+
+    if System.String.IsNullOrWhiteSpace t
+    then Logger.debug "cached token: no"; None
+    else Logger.debugfn "cached token: yes -> %s" (substringTruncatedSafe t 5); Some t
+
+let private acquireToken () =
     let mutable token = None
-    let callback _ (t : string) : obj option =
+    let callback error (t : string) : obj option =
+        if not (System.String.IsNullOrWhiteSpace t)
+        then Logger.debugfn "ADAL.js error: %s" error
+
         token <- if System.String.IsNullOrWhiteSpace t
                  then None
                  else Some t
         None
 
-    context.acquireToken(clientId, callback)
+    match getCachedToken () with
+    | Some token -> Some token
+    | None ->
+        context.handleWindowCallback()
+        context.acquireToken(clientId, callback)
+        token
 
-    match token with
-    | None -> requestHeaders []
-    | Some t -> requestHeaders [ Authorization ("Bearer " + t) ]
+let tokenError () =
+    context.getLoginError ()
+
+let bearerHeader() =
+
+    match acquireToken () with
+    | None ->
+    // this path seems to fire even when
+    // 1. a cached token expires,
+    // 2. adal.js gets a new token,
+    // 3. the token is acceptable.
+    // It is misleading when the console shows messages indicating "failure to get a token" while token api calls still work.
+        Logger.errorfn "Could not acquire token because:\n %s" (tokenError())
+        requestHeaders []
+    | Some token ->
+        requestHeaders [ Authorization (sprintf "Bearer %s" token) ]
 
 let runWithAdal (authenticationContext : adal.Adal.AuthenticationContext) (program : Elmish.Program<_,_,_,_>) =
     authenticationContext.handleWindowCallback()
