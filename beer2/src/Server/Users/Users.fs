@@ -6,6 +6,8 @@ let controller = controller {
     // requires an "x-controller-version" header to match the version specified in this controller { ... } computation expression
     // version "1"
 
+    subController "/about" About.Controller.controller
+
     // view list of users
     index (fun ctx -> Users.Database.getAll () |> Controller.json ctx)
     add (fun ctx -> "Add handler version 1" |> Controller.text ctx)

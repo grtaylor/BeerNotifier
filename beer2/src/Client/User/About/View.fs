@@ -7,6 +7,6 @@ open Fable.Helpers.React.Props
 
 open Fulma
 
-let root model _ =
+let root (model : Model) _ =
     Container.container []
-        [ str "All about YOU" ]
+        [ str (sprintf "Logged in as: %s" model.Name ) ]

@@ -21,7 +21,7 @@ let init (userPage : Router.User) =
             let (subModel, subCmd) = User.Create.State.init ()
             { model with CreateModel = Some subModel }, Cmd.map CreateMsg subCmd
         | User.AboutMe ->
-            let (subModel, subCmd) = User.About.State.init ()
+            let (subModel, subCmd) = User.About.State.init Shared.Entities.UserAboutInfo.SelfId
             { model with AboutModel = Some subModel }, Cmd.map AboutMsg subCmd
 
     currentPageModel, currentPageCmd

@@ -8,6 +8,7 @@
     <Compile Include="Users/Entities.fs" />
     <Compile Include="Users/Domain.fs" />
     <Compile Include="Users/Database.fs" />
+    <Compile Include="Users/About.fs" />
     <Compile Include="Users/Users.fs" />
     <Compile Include="Authentication.fs" />
     <Compile Include="SaturnExtensions.fs" />
