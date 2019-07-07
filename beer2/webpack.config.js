@@ -91,7 +91,7 @@ module.exports = {
     // Besides the HtmlPlugin, we use the following plugins:
     // PRODUCTION
     //      - MiniCssExtractPlugin: Extracts CSS from bundle to a different file
-    //          To minify CSS, see https://github.com/webpack-contrib/mini-css-extract-plugin#minimizing-for-production    
+    //          To minify CSS, see https://github.com/webpack-contrib/mini-css-extract-plugin#minimizing-for-production
     //      - CopyWebpackPlugin: Copies static assets to output directory
     // DEVELOPMENT
     //      - HotModuleReplacementPlugin: Enables hot reloading when code changes without refreshing
@@ -111,6 +111,9 @@ module.exports = {
     devServer: {
         publicPath: "/",
         contentBase: resolve(CONFIG.assetsDir),
+        // set host to access webpack dev-server inside a linux container
+        // https://github.com/theimowski/webpack-config-template/commit/da34b0fb593a902efd735d8567ae39ccebd2ca6d for
+        host: '0.0.0.0',
         port: CONFIG.devServerPort,
         proxy: CONFIG.devServerProxy,
         hot: true,
