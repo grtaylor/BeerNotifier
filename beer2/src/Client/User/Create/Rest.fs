@@ -1,6 +1,6 @@
 module User.Create.Rest
 
-open Fable.PowerPack
+open Fable.Core
 
 open System
 

@@ -2,8 +2,8 @@ module Client.Main
 
 open Elmish
 open Elmish.React
-open Elmish.Browser.Navigation
-open Elmish.Browser.UrlParser
+open Elmish.Navigation
+open Elmish.UrlParser
 
 open Client.State
 open Client.View
@@ -16,13 +16,12 @@ open Elmish.HMR
 #endif
 
 Program.mkProgram init update root
-|> Program.toNavigable (parseHash Router.pageParser) urlUpdate
+|> Program.toNavigable (Router.urlParser) urlUpdate
 #if DEBUG
 |> Program.withConsoleTrace
-|> Program.withHMR
 #endif
-|> Program.withReact "elmish-app"
+|> Program.withReactBatched "elmish-app"
 #if DEBUG
 |> Program.withDebugger
 #endif
-|> Authentication.runWithAdal Authentication.context
+|> Program.run

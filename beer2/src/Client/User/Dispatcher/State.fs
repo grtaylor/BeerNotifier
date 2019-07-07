@@ -26,10 +26,10 @@ let init (userPage : Router.User) =
 
     currentPageModel, currentPageCmd
 
-let update msg model =
+let update authUser msg model =
     match msg, model with
     | IndexMsg msg, { IndexModel = Some extractedModel } ->
-        let (subModel, subCmd) = User.Index.State.update msg extractedModel
+        let (subModel, subCmd) = User.Index.State.update authUser msg extractedModel
         { model with IndexModel = Some subModel }, Cmd.map IndexMsg subCmd
 
     | ShowMsg msg, { ShowModel = Some extractedModel } ->
@@ -41,16 +41,16 @@ let update msg model =
         { model with CreateModel = Some subModel }, Cmd.map CreateMsg subCmd
 
     | AboutMsg msg, { AboutModel = Some extractedModel } ->
-        let (subModel, subCmd) = User.About.State.update msg extractedModel
+        let (subModel, subCmd) = User.About.State.update authUser msg extractedModel
         { model with AboutModel = Some subModel }, Cmd.map AboutMsg subCmd
     // do not wildcard the entire model so pattern matching will help you detect when you add a new Model type
     // so, do not do this:
     // | AMsg _, _ ->
     //
-    // XyzMsg can only apply when XyzModel is initialized to handle Msgs
+    // PageMsg can only apply when PageModel is initialized to handle Msgs
     | IndexMsg _, { IndexModel = None }
     | ShowMsg _, { ShowModel = None }
     | CreateMsg _, { CreateModel = None }
     | AboutMsg _, { AboutModel = None } ->
-        Browser.console.log "[User.Dispatcher.State] discarded message"
+        Browser.Dom.console.log "[User.Dispatcher.State] discarded message"
         model, Cmd.none

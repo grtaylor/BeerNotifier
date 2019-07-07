@@ -10,7 +10,11 @@ let init userId =
 let update msg (model : Model) =
     match msg with
     | GetDetails userId ->
-        model, Cmd.ofPromise Rest.getDetails userId (GetDetailsResult.Success >> GetDetailsResult) (GetDetailsResult.Error >> GetDetailsResult)
+        model, Cmd.OfPromise.either
+            Rest.getDetails
+            userId
+            (GetDetailsResult.Success >> GetDetailsResult)
+            (GetDetailsResult.Error >> GetDetailsResult)
 
     | GetDetailsResult result ->
         match result with

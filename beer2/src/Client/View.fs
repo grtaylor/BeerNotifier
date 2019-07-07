@@ -1,7 +1,7 @@
 module Client.View
 
-open Fable.Helpers.React
-open Fable.Helpers.React.Props
+open Fable.React
+open Fable.React.Props
 
 open Fable.FontAwesome
 
@@ -69,7 +69,8 @@ let private navbarStart dispatch =
             [ str "About Me" ]
         ]
 
-let private navbarView model dispatch =
+// maybe emphasize the current page in the navbar
+let private navbarView (model: Model) dispatch =
     div [ ClassName "navbar-bg" ]
         [ Container.container []
             [ Navbar.navbar [ Navbar.CustomClass "is-primary" ]
@@ -83,22 +84,23 @@ let private navbarView model dispatch =
             ] ]
 
 let private homeView model dispatch =
-    Container.container [ Container.IsFluid ]
-        [ Content.content []
+    Container.container [ Container.IsFluid ] [
+        Content.content []
+            [ Authentication.root model.Session (AuthDispatcherMsg >> dispatch) ]
+        Content.content []
             [ str "Should probably greet the logged in user"
               button "Sign me up for beer next week!" (fun _ ->
-                Fable.Import.Browser.window.alert("OK - you are signed up for beer next week! (once this button is wired up)") )
+                Browser.Dom.window.alert("OK - you are signed up for beer next week! (once this button is wired up)") )
             ]
-        ]
+    ]
 
-let private renderPage model dispatch =
+let private renderPage model (dispatch: Msg -> unit) =
     match model with
     | { CurrentPage = Page.Home } ->
         homeView model dispatch
     | { CurrentPage = Page.AuthPage (AuthPage.User _)
         UserDispatcher = Some extractedModel } ->
-        let d' = (UserDispatcherMsg >> dispatch)
-        User.Dispatcher.View.root extractedModel d'
+        User.Dispatcher.View.root extractedModel (UserDispatcherMsg >> dispatch)
     | _ ->
         p [] [ str "Page not found" ]
 

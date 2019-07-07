@@ -33,7 +33,8 @@ let update msg (model : Model) =
             newModel, Cmd.none
         | newModel, false ->
             { newModel with IsWaitingOnServer = true },
-                Cmd.ofPromise Rest.createUser
+                Cmd.OfPromise.either
+                    Rest.createUser
                     (model.UserName)
                     (CreateUserResult.Success >> CreateUserResult)
                     (CreateUserResult.Error >> CreateUserResult)

@@ -99,12 +99,42 @@ Target.create "Run" (fun _ ->
     |> ignore
 )
 
+let buildDocker tag =
+    let args = sprintf "build -t %s ." tag
+    runTool "docker" args "."
+
+Target.create "Bundle" (fun _ ->
+    let serverDir = Path.combine deployDir "Server"
+    let clientDir = Path.combine deployDir "Client"
+    let publicDir = Path.combine clientDir "public"
+
+    let publishArgs = sprintf "publish -c Release -o \"%s\"" serverDir
+    runDotNet publishArgs serverPath
+
+    Shell.copyDir publicDir clientDeployPath FileFilter.allFiles
+)
+
+
+let dockerUser = "safe-template"
+let dockerImageName = "safe-template"
+let dockerFullName = sprintf "%s/%s" dockerUser dockerImageName
+
+Target.create "Docker" (fun _ ->
+    buildDocker dockerFullName
+)
+
+
+
+
+
 
 open Fake.Core.TargetOperators
 
 "Clean"
     ==> "InstallClient"
     ==> "Build"
+    ==> "Bundle"
+    ==> "Docker"
 
 "Clean"
     ==> "InstallClient"

@@ -2,7 +2,7 @@ module User.Show.Rest
 
 open Types
 
-open Fable.PowerPack
+open Fable.Core
 open Fable.Core.JsInterop
 
 open System

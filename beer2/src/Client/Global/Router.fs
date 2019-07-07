@@ -1,9 +1,9 @@
 module Router
 
 open Fable.Import
-open Fable.Helpers.React.Props
-open Elmish.Browser.Navigation
-open Elmish.Browser.UrlParser
+open Fable.React.Props
+open Elmish.Navigation
+open Elmish.UrlParser
 
 [<RequireQualifiedAccess>]
 type User =
@@ -36,7 +36,7 @@ let private toHash page =
             | User.AboutMe -> "#users/about"
     | Page.Home -> "#/"
 
-let pageParser : Parser<Page -> Page, Page> =
+let private pageParser : Parser<Page -> Page, Page> =
     oneOf [
         map (User.Index |> AuthPage.User |> Page.AuthPage) (s "users" </> s "index")
         map (User.Show >> AuthPage.User >> Page.AuthPage) (s "users" </> i32)
@@ -56,4 +56,6 @@ let newUrl route =
     route |> toHash |> Navigation.newUrl
 
 let modifyLocation route =
-    Browser.window.location.href <- toHash route
+    Browser.Dom.window.location.href <- toHash route
+
+let urlParser location = parseHash pageParser location

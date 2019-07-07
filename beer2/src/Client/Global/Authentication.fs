@@ -1,83 +1,123 @@
 module Authentication
 
 open Elmish
+open Elmish.React
 
-open Fable.Core.JsInterop
-open Fable.Import.Browser
-open Fable.PowerPack.Fetch
+open Fable.Core.JsInterop // provides !! operator
+
+open Fable.React
+open Fable.React.Props
+
+open Fulma
+
+open Fable.FontAwesome
+
+open Shared
 
 
 // not secrets, just don't need to be public
-let private clientId = "509363f2-0873-4f6f-8016-38fdde52634b"
-let private tenantId = "64b0287b-af0d-4307-ae82-febfb154a6e6"
+let [<Literal>] private ClientId = "509363f2-0873-4f6f-8016-38fdde52634b"
+let [<Literal>] private TenantId = "64b0287b-af0d-4307-ae82-febfb154a6e6"
+let [<Literal>] private WebRedirectUri = "http://localhost:8080/redirectUri"
 
-// should be initialized once on UI startup
-let context =
-    let config = createEmpty<adal.Adal.Config>
-    config.clientId <- clientId
-    config.tenant <- Some tenantId
-    config.postLogoutRedirectUri <- Some "https://google.com" //Some window.location.origin
-    config.cacheLocation <- Some "localstorage"
+type User = {
+    Name: string
+    Token: string
+}
 
-    adal.Adal.createAuthContext(config)
+type Model =
+| Loading
+| NotAuthenticated
+| Authenticated of User
 
-let private substringSafe (str : string) length =
-    if str.Length >= length
-    then str.Substring(0, length)
-    else str.Substring(0)
+type Msg =
+| SignIn
+| SignInResult of Result<User, exn>
+| SignOut
+| SignOutResult of Result<unit, exn>
 
-let private substringTruncatedSafe str length =
-    (substringSafe str length) + sprintf "... [truncated to length %i]" length
+let userAgentApplication =
+    let authority = sprintf "https://login.microsoftonline.com/%s" TenantId
 
-let private getCachedToken () =
-    let t = context.getCachedToken(clientId)
+    let options =
+        let cacheOptions = Fable.Core.JsInterop.createEmpty<Msal.CacheOptions>
+        cacheOptions.cacheLocation <- Some Msal.CacheLocation.LocalStorage
 
-    if System.String.IsNullOrWhiteSpace t
-    then Logger.debug "cached token: no"; None
-    else Logger.debugfn "cached token: yes -> %s" (substringTruncatedSafe t 5); Some t
+        let authOptions = Fable.Core.JsInterop.createEmpty<Msal.AuthOptions>
+        authOptions.authority <- Some authority
+        authOptions.clientId <- ClientId
+        // I don't know why type Fable.Core.U2 is necessary over just option.
+        // authOptions.redirectUri <- Some (Fable.Core.Case1 WebRedirectUri)
 
-let private acquireToken () =
-    let mutable token = None
-    let callback error (t : string) : obj option =
-        if not (System.String.IsNullOrWhiteSpace t)
-        then Logger.debugfn "ADAL.js error: %s" error
+        let o = Fable.Core.JsInterop.createEmpty<Msal.Configuration>
+        o.cache <- Some cacheOptions
+        o.auth <- authOptions
+        o
 
-        token <- if System.String.IsNullOrWhiteSpace t
-                 then None
-                 else Some t
-        None
+    Msal.UserAgentApplication.Create(options)
 
-    match getCachedToken () with
-    | Some token -> Some token
+let getToken () = promise {
+    let authParams = Fable.Core.JsInterop.createEmpty<Msal.AuthenticationParameters>
+    authParams.scopes <- Some !![| ClientId |]
+    try
+        let! authResponse = userAgentApplication.acquireTokenSilent authParams
+        return authResponse.accessToken
+    with error ->
+        try
+            // if error :? Msal.InteractionRequiredAuthError then
+            let! authResponse = userAgentApplication.acquireTokenPopup authParams
+            return authResponse.accessToken
+            // else
+            //     return reraise()
+        with error ->
+            return failwith "Please sign in using your Microsoft account."
+}
+
+let makeAuthHeader authUser =
+    Fetch.Types.HttpRequestHeaders.Authorization ("Bearer " + authUser.Token)
+
+let private signInPromise _ = promise {
+    let authParams = Fable.Core.JsInterop.createEmpty<Msal.AuthenticationParameters>
+    authParams.scopes <- Some (ResizeArray [| "User.Read" |])
+    let! authResponse = userAgentApplication.loginPopup authParams
+    let! token = getToken()
+    return { Name = userAgentApplication.getAccount().name; Token = token }
+}
+
+let private signOutPromise _ = promise {
+    userAgentApplication.logout()
+}
+
+let update msg model =
+    match msg with
+    | SignIn -> model, Cmd.OfPromise.either signInPromise () (Ok >> SignInResult) (Error >> SignInResult)
+    | SignInResult (Ok user) -> Authenticated user, Cmd.none
+    | SignInResult (Error _) -> NotAuthenticated, Cmd.none
+    | SignOut -> model, Cmd.OfPromise.either signOutPromise () (Ok >> SignOutResult) (Error >> SignOutResult)
+    | SignOutResult  (Ok ()) -> NotAuthenticated, Cmd.none
+    | SignOutResult  (Error _) -> NotAuthenticated, Cmd.none
+
+let init () = NotAuthenticated, Cmd.none
+
+let root (model: Model option) dispatch =
+    match model with
+    | Some Loading ->
+        Button.button [ Button.IsLoading true ] []
+
+    | Some NotAuthenticated
     | None ->
-        context.handleWindowCallback()
-        context.acquireToken(clientId, callback)
-        token
+        Button.button
+            [ Button.OnClick (fun _e -> dispatch SignIn) ]
+            [
+                Icon.icon [] [ Fa.i [ Fa.Brand.Windows ] [] ]
+                span [] [ str "Sign in" ]
+            ]
 
-let tokenError () =
-    context.getLoginError ()
+    | Some (Authenticated user) ->
+        Button.button
+            [ Button.OnClick (fun _e -> dispatch SignOut) ]
+            [
+                Icon.icon [] [ Fa.i [ Fa.Brand.Windows ] [] ]
+                span [] [ str (sprintf "%s | Sign out" user.Name) ]
+            ]
 
-let bearerHeader() =
-
-    match acquireToken () with
-    | None ->
-    // this path seems to fire even when
-    // 1. a cached token expires,
-    // 2. adal.js gets a new token,
-    // 3. the token is acceptable.
-    // It is misleading when the console shows messages indicating "failure to get a token" while token api calls still work.
-        Logger.errorfn "Could not acquire token because:\n %s" (tokenError())
-        requestHeaders []
-    | Some token ->
-        requestHeaders [ Authorization (sprintf "Bearer %s" token) ]
-
-let runWithAdal (authenticationContext : adal.Adal.AuthenticationContext) (program : Elmish.Program<_,_,_,_>) =
-    authenticationContext.handleWindowCallback()
-
-    if obj.ReferenceEquals(Fable.Import.Browser.window, Fable.Import.Browser.window.parent) &&
-       obj.ReferenceEquals(Fable.Import.Browser.window, Fable.Import.Browser.window.top) &&
-       (not (authenticationContext.isCallback(Fable.Import.Browser.window.location.hash))) then
-        if isNull (authenticationContext.getCachedToken(authenticationContext.config.clientId)) || isNull (authenticationContext.getCachedUser()) then
-            authenticationContext.login()
-        else
-            Program.run program

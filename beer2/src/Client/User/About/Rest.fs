@@ -2,13 +2,20 @@ module User.About.Rest
 
 open Types
 
-open Fable.PowerPack
-open Fable.PowerPack.Fetch
+open Fetch
 
-let getAboutInfo userId =
+let getAboutInfo userId authUser =
     promise {
         let! data =
-            fetch (sprintf "/api/users/%i/about" userId) [ Authentication.bearerHeader() ]
+            let authenticatedJsonHeaders =
+                [ Authentication.makeAuthHeader authUser
+                  HttpRequestHeaders.ContentType "application/json" ]
+
+            let requestProperties =
+                [ (requestHeaders authenticatedJsonHeaders) ]
+
+            fetch (sprintf "/api/users/%i/about" userId)
+                  requestProperties
             |> Promise.bind (fun result -> result.json<Shared.Entities.UserAboutInfo>())
 
         return GetAboutInfoResult.Success data
