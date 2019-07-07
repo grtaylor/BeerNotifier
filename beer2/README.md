@@ -2,6 +2,11 @@
 
 This template can be used to generate a full-stack web application using the [SAFE Stack](https://safe-stack.github.io/). It was created using the dotnet [SAFE Template](https://safe-stack.github.io/docs/template-overview/). If you want to learn more about the template why not start with the [quick start](https://safe-stack.github.io/docs/quickstart/) guide?
 
+## Developing
+
+- [VSCode Dev Container](https://code.visualstudio.com/docs/remote/containers)
+  - unfortunately, it appears you need .NET Core SDK on your development machine for ionide to work even while using the Dev Container having .NET Core SDK
+
 ## Install pre-requisites
 
 You'll need to install the following pre-requisites in order to build SAFE applications
