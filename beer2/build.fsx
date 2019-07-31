@@ -12,6 +12,10 @@ open Fake.Core
 open Fake.DotNet
 open Fake.IO
 
+// This is a new API to parse the command line arguments and set the environment *before* defining targets.
+// This should be used at the start of the fake script.
+Target.initEnvironment()
+
 let serverPath = Path.getFullName "./src/Server"
 let clientPath = Path.getFullName "./src/Client"
 let clientDeployPath = Path.combine clientPath "deploy"
@@ -73,10 +77,7 @@ Target.create "Build" (fun _ ->
     runTool yarnTool "webpack-cli -p" __SOURCE_DIRECTORY__
 )
 
-Target.create "Run" (fun _ ->
-    let server = async {
-        runDotNet "watch run" serverPath
-    }
+Target.create "RunUi" (fun _ ->
     let client = async {
         runTool yarnTool "webpack-dev-server" __SOURCE_DIRECTORY__
     }
@@ -86,18 +87,37 @@ Target.create "Run" (fun _ ->
     }
 
     let vsCodeSession = Environment.hasEnvironVar "vsCodeSession"
-    let safeClientOnly = Environment.hasEnvironVar "safeClientOnly"
 
-    let tasks =
-        [ if not safeClientOnly then yield server
-          yield client
-          if not vsCodeSession then yield browser ]
+    let tasks = [
+        yield client
+        // if not vsCodeSession then yield browser
+    ]
 
     tasks
     |> Async.Parallel
     |> Async.RunSynchronously
     |> ignore
 )
+
+Target.create "RunServer" (fun _ ->
+    let server = async {
+        runDotNet "watch run" serverPath
+    }
+
+    let safeClientOnly = Environment.hasEnvironVar "safeClientOnly"
+
+    let tasks = [
+        if not safeClientOnly then yield server
+    ]
+
+    tasks
+    |> Async.Parallel
+    |> Async.RunSynchronously
+    |> ignore
+)
+
+/// Empty target to intended to run Server and Ui
+Target.create "Run" (ignore)
 
 let buildDocker tag =
     let args = sprintf "build -t %s ." tag
@@ -138,6 +158,12 @@ open Fake.Core.TargetOperators
 
 "Clean"
     ==> "InstallClient"
+    ==> "Run"
+
+//
+"RunServer"
+    ==> "Run"
+"RunUi"
     ==> "Run"
 
 Target.runOrDefaultWithArguments "Build"
