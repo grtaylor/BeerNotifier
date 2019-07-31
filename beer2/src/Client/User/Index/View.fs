@@ -8,18 +8,24 @@ open Fable.React.Props
 open Fulma
 
 let private userView (user : Shared.Entities.User) =
-    p [] [ str user.UserName ]
+    Card.card [] [
+        Card.Header.title [ Card.Header.Title.IsCentered ]
+            [ str user.UserName ]
+        Card.content []
+            [ Content.content []
+                [ str "How many times this person has been chosen?" ] ]
+    ]
 
 let private usersList users =
-    Columns.columns [ Columns.IsCentered ]
-        [ Column.column [ Column.Width(Screen.All, Column.IsTwoThirds) ]
-            (users |> List.map userView) ]
+    ul [] [ for user in users do
+                yield userView user ]
 
-let root model _ =
+let private content model =
     match model.Users with
     | Some users ->
-        Container.container []
-            [ usersList users ]
+        [ usersList users ]
     | None ->
-        Container.container []
-            [ str "Nothing to show right now." ]
+        [ str "Nothing to show right now." ]
+
+let root model _ =
+    Container.container [] (content model)
