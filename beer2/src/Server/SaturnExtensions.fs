@@ -7,7 +7,6 @@ open Microsoft.AspNetCore.Builder
 open Microsoft.Extensions.DependencyInjection
 
 open System
-open Microsoft.AspNetCore.Authentication.OpenIdConnect
 
 module OpenIdAuth =
     let private addCookie state (c:AuthenticationBuilder) =

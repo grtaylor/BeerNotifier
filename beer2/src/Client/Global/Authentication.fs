@@ -39,16 +39,16 @@ let userAgentApplication =
     let authority = sprintf "https://login.microsoftonline.com/%s" TenantId
 
     let options =
-        let cacheOptions = Fable.Core.JsInterop.createEmpty<Msal.CacheOptions>
+        let cacheOptions = createEmpty<Msal.CacheOptions>
         cacheOptions.cacheLocation <- Some Msal.CacheLocation.LocalStorage
 
-        let authOptions = Fable.Core.JsInterop.createEmpty<Msal.AuthOptions>
+        let authOptions = createEmpty<Msal.AuthOptions>
         authOptions.authority <- Some authority
         authOptions.clientId <- ClientId
         // I don't know why type Fable.Core.U2 is necessary over just option.
         // authOptions.redirectUri <- Some (Fable.Core.Case1 WebRedirectUri)
 
-        let o = Fable.Core.JsInterop.createEmpty<Msal.Configuration>
+        let o = createEmpty<Msal.Configuration>
         o.cache <- Some cacheOptions
         o.auth <- authOptions
         o
@@ -56,7 +56,7 @@ let userAgentApplication =
     Msal.UserAgentApplication.Create(options)
 
 let getToken () = promise {
-    let authParams = Fable.Core.JsInterop.createEmpty<Msal.AuthenticationParameters>
+    let authParams = createEmpty<Msal.AuthenticationParameters>
     authParams.scopes <- Some !![| ClientId |]
     try
         let! authResponse = userAgentApplication.acquireTokenSilent authParams
@@ -76,12 +76,9 @@ let getToken () = promise {
 let makeAuthHeader model =
 
     let getAuthHeader() = promise {
-        Logger.debug "getAuthHeader"
         let! token = getToken()
         return Fetch.Types.HttpRequestHeaders.Authorization ("Bearer " + token)
     }
-
-    Logger.debugfn "[makeAuthHeader] model: %A" model
 
     match model with
     | NotAuthenticated
@@ -89,7 +86,7 @@ let makeAuthHeader model =
     | Authenticated _ -> Some (getAuthHeader())
 
 let private signInPromise _ = promise {
-    let authParams = Fable.Core.JsInterop.createEmpty<Msal.AuthenticationParameters>
+    let authParams = createEmpty<Msal.AuthenticationParameters>
     authParams.scopes <- Some (ResizeArray [| "User.Read" |])
     let! authResponse = userAgentApplication.loginPopup authParams
     let! token = getToken()
