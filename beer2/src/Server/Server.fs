@@ -9,6 +9,7 @@ open Microsoft.AspNetCore.Authentication
 open Microsoft.AspNetCore.Authentication.OpenIdConnect
 open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.DependencyInjection
+open Microsoft.Extensions.Logging
 
 open FSharp.Control.Tasks.V2
 
@@ -65,10 +66,12 @@ let openIdConfig =
     let fn = fun (o: OpenIdConnect.OpenIdConnectOptions) ->
         o.ClientId <- clientId
         o.Authority <- authority
-        o.UseTokenLifetime <- true
+        o.UseTokenLifetime <- false // false by default, but true in the sample https://github.com/SaturnFramework/Saturn/issues/139#issue-361067157
         // <website root>/signin-oidc is default per https://github.com/openiddict/openiddict-core/issues/35#issuecomment-162450400
         // make sure this path is set in portal.azure.com Azure AD Redirect URIs
+        o.CallbackPath <- PathString("/signin-oidc")
         o.ResponseType <- "id_token"
+        o.TokenValidationParameters.ValidateIssuer <- true
 
     Action<OpenIdConnect.OpenIdConnectOptions>(fn)
 
@@ -83,6 +86,9 @@ let app = application {
     // we extended Saturn with SaturnExtensions.fs (name of the file does not matter)
     use_open_id_auth_with_config openIdConfig
     use_gzip
+    // todo - load this minimum level from config
+    // TRACE so I can see more details about OpenIdConnect challenges
+    logging (fun builder -> builder.SetMinimumLevel(LogLevel.Trace) |> ignore)
     use_cors "localhost:8080"
         (fun builder -> builder.WithOrigins("http://localhost:8080")
                                .AllowAnyHeader()

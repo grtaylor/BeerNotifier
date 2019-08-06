@@ -26,10 +26,10 @@ let init (userPage : Router.User) =
 
     currentPageModel, currentPageCmd
 
-let update authUser msg model =
+let update authModel msg model =
     match msg, model with
     | IndexMsg msg, { IndexModel = Some extractedModel } ->
-        let (subModel, subCmd) = User.Index.State.update authUser msg extractedModel
+        let (subModel, subCmd) = User.Index.State.update authModel msg extractedModel
         { model with IndexModel = Some subModel }, Cmd.map IndexMsg subCmd
 
     | ShowMsg msg, { ShowModel = Some extractedModel } ->
@@ -41,7 +41,7 @@ let update authUser msg model =
         { model with CreateModel = Some subModel }, Cmd.map CreateMsg subCmd
 
     | AboutMsg msg, { AboutModel = Some extractedModel } ->
-        let (subModel, subCmd) = User.About.State.update authUser msg extractedModel
+        let (subModel, subCmd) = User.About.State.update authModel msg extractedModel
         { model with AboutModel = Some subModel }, Cmd.map AboutMsg subCmd
     // do not wildcard the entire model so pattern matching will help you detect when you add a new Model type
     // so, do not do this:

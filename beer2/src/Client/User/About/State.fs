@@ -7,12 +7,12 @@ open Elmish
 let init userId =
     Model.Empty, Cmd.ofMsg (GetAboutInfo userId)
 
-let update (authUser: Authentication.User) msg (model : Model) =
+let update (authModel: Authentication.Model) msg (model : Model) =
     match msg with
     | GetAboutInfo userId ->
         model, Cmd.OfPromise.either
                     // do I need to wrap getAboutInfo when I have all args?
-                    (fun _ -> Rest.getAboutInfo userId authUser)
+                    (fun _ -> Rest.getAboutInfo userId authModel)
                     ()
                     GetAboutInfoResult
                     (GetAboutInfoResult.Error >> GetAboutInfoResult)

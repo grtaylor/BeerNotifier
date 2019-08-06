@@ -47,8 +47,8 @@ let update (msg : Msg) (model : Model) : Model * Cmd<Msg> =
 
     // continue with the rest of the application when Authenticated
     | (UserDispatcherMsg msg, { UserDispatcher = Some extractedModel
-                                Session = Some (Authentication.Authenticated (authUser)) }) ->
-        let (subModel, subCmd) = User.Dispatcher.State.update authUser msg extractedModel
+                                Session = Some extractedSession }) ->
+        let (subModel, subCmd) = User.Dispatcher.State.update extractedSession msg extractedModel
         { model with UserDispatcher = Some subModel }, Cmd.map UserDispatcherMsg subCmd
 
     /// handle not set state, like missing XyzDispatcher or Session
@@ -58,10 +58,6 @@ let update (msg : Msg) (model : Model) : Model * Cmd<Msg> =
         printAndDiscardMessage capturedMsg model
 
     /// other patterns that should be discarded
-    | capturedMsg, ({ CurrentPage = _
-                      Session = Some Loading
-                      UserDispatcher = Some _ } as model) ->
-        printAndDiscardMessage capturedMsg model
     | capturedMsg, ({ CurrentPage = _
                       Session = None
                       UserDispatcher = Some _ } as model) ->

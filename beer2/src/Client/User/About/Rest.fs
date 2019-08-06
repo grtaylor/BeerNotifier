@@ -4,11 +4,16 @@ open Types
 
 open Fetch
 
-let getAboutInfo userId authUser =
+let getAboutInfo userId authModel =
     promise {
+        let! authHeader =
+            match Authentication.makeAuthHeader authModel with
+            | Some header -> header
+            | None -> Promise.reject "Unable to create authHeader"
+
         let! data =
             let authenticatedJsonHeaders =
-                [ Authentication.makeAuthHeader authUser
+                [ authHeader
                   HttpRequestHeaders.ContentType "application/json" ]
 
             let requestProperties =

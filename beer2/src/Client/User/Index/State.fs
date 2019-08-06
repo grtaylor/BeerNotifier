@@ -7,12 +7,12 @@ open Elmish
 let init () =
     Model.Empty, Cmd.ofMsg GetUsers
 
-let update authUser msg (model : Model) =
+let update authModel msg (model : Model) =
     match msg with
     | GetUsers ->
         model, Cmd.OfPromise.either
                     // need to wrap this?
-                    (fun _ -> (Rest.getUsers authUser))
+                    (fun _ -> (Rest.getUsers authModel))
                     ()
                     GetUsersResult
                     (GetUsersResult.Error >> GetUsersResult)

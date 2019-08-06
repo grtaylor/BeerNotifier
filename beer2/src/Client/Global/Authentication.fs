@@ -18,11 +18,10 @@ open Shared
 // not secrets, just don't need to be public
 let [<Literal>] private ClientId = "509363f2-0873-4f6f-8016-38fdde52634b"
 let [<Literal>] private TenantId = "64b0287b-af0d-4307-ae82-febfb154a6e6"
-let [<Literal>] private WebRedirectUri = "http://localhost:8080/redirectUri"
 
 type User = {
     Name: string
-    Token: string
+    // Token: string
 }
 
 type Model =
@@ -64,6 +63,7 @@ let getToken () = promise {
         return authResponse.accessToken
     with error ->
         try
+            Logger.errorfn "Error in getToken: %A" error
             // if error :? Msal.InteractionRequiredAuthError then
             let! authResponse = userAgentApplication.acquireTokenPopup authParams
             return authResponse.accessToken
@@ -73,15 +73,27 @@ let getToken () = promise {
             return failwith "Please sign in using your Microsoft account."
 }
 
-let makeAuthHeader authUser =
-    Fetch.Types.HttpRequestHeaders.Authorization ("Bearer " + authUser.Token)
+let makeAuthHeader model =
+
+    let getAuthHeader() = promise {
+        Logger.debug "getAuthHeader"
+        let! token = getToken()
+        return Fetch.Types.HttpRequestHeaders.Authorization ("Bearer " + token)
+    }
+
+    Logger.debugfn "[makeAuthHeader] model: %A" model
+
+    match model with
+    | NotAuthenticated
+    | Loading -> None
+    | Authenticated _ -> Some (getAuthHeader())
 
 let private signInPromise _ = promise {
     let authParams = Fable.Core.JsInterop.createEmpty<Msal.AuthenticationParameters>
     authParams.scopes <- Some (ResizeArray [| "User.Read" |])
     let! authResponse = userAgentApplication.loginPopup authParams
     let! token = getToken()
-    return { Name = userAgentApplication.getAccount().name; Token = token }
+    return { Name = userAgentApplication.getAccount().name } //; Token = token }
 }
 
 let private signOutPromise _ = promise {
