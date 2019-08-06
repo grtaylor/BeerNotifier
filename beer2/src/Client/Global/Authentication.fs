@@ -106,7 +106,7 @@ let update msg model =
     | SignOutResult  (Ok ()) -> NotAuthenticated, Cmd.none
     | SignOutResult  (Error _) -> NotAuthenticated, Cmd.none
 
-let init () = NotAuthenticated, Cmd.none
+let init () = Loading, Cmd.ofMsg SignIn
 
 let root (model: Model option) dispatch =
     match model with
