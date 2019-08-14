@@ -88,9 +88,14 @@ let makeAuthHeader model =
 let private signInPromise _ = promise {
     let authParams = createEmpty<Msal.AuthenticationParameters>
     authParams.scopes <- Some (ResizeArray [| "User.Read" |])
-    let! authResponse = userAgentApplication.loginPopup authParams
-    let! token = getToken()
-    return { Name = userAgentApplication.getAccount().name } //; Token = token }
+    let user = userAgentApplication.getAccount() |> Option.ofObj
+    match user with
+    | Some msalAccount ->
+        return { Name = msalAccount.name } //; Token = token }
+    | None ->
+        let! authResponse = userAgentApplication.loginPopup authParams
+        let! token = getToken()
+        return { Name = authResponse.account.name } //; Token = token }
 }
 
 let private signOutPromise _ = promise {
